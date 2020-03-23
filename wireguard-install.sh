@@ -141,7 +141,7 @@ PostDown = iptables -D FORWARD -i $SERVER_WG_NIC -j ACCEPT; iptables -t nat -D P
 fi
 
 # Add start marker to peer
-echo "# $CLIENT_NAME MARKER START" >> /etc/wireguard/$SERVER_WG_NIC.conf
+echo "# $CLIENT_NAME START" >> /etc/wireguard/$SERVER_WG_NIC.conf
 
 # Add the client as a peer to the server
 echo "[Peer]
@@ -169,7 +169,7 @@ case "$SYM_KEY" in
         ;;
 esac
 
-echo "# $CLIENT_NAME MARKER END" >> /etc/wireguard/$SERVER_WG_NIC.conf
+echo "# $CLIENT_NAME END" >> /etc/wireguard/$SERVER_WG_NIC.conf
 
 chmod 600 -R /etc/wireguard/
 
