@@ -152,20 +152,20 @@ AllowedIPs = $CLIENT_WG_IPV4/32,$CLIENT_WG_IPV6/128" >> "/etc/wireguard/$SERVER_
 echo "[Interface]
 PrivateKey = $CLIENT_PRIV_KEY
 Address = $CLIENT_WG_IPV4/24,$CLIENT_WG_IPV6/64
-DNS = $CLIENT_DNS_1,$CLIENT_DNS_2" > "$HOME/$SERVER_WG_NIC-client.conf"
+DNS = $CLIENT_DNS_1,$CLIENT_DNS_2" > "$HOME/$SERVER_WG_NIC-$CLIENT_NAME.conf"
 
 # Add the server as a peer to the client
 echo "[Peer]
 PublicKey = $SERVER_PUB_KEY
 Endpoint = $ENDPOINT
-AllowedIPs = 0.0.0.0/0,::/0" >> "$HOME/$SERVER_WG_NIC-client.conf"
+AllowedIPs = 0.0.0.0/0,::/0" >> "$HOME/$SERVER_WG_NIC-$CLIENT_NAME.conf"
 
 # Add pre shared symmetric key to respective files
 case "$SYM_KEY" in
     [yY][eE][sS]|[yY])
         CLIENT_SYMM_PRE_KEY=$( wg genpsk )
         echo "PresharedKey = $CLIENT_SYMM_PRE_KEY" >> "/etc/wireguard/$SERVER_WG_NIC.conf"
-        echo "PresharedKey = $CLIENT_SYMM_PRE_KEY" >> "$HOME/$SERVER_WG_NIC-client.conf"
+        echo "PresharedKey = $CLIENT_SYMM_PRE_KEY" >> "$HOME/$SERVER_WG_NIC-$CLIENT_NAME.conf"
         ;;
 esac
 
@@ -184,7 +184,7 @@ systemctl enable "wg-quick@$SERVER_WG_NIC"
 
 echo -e "\nHere is your client config file as a QR Code:"
 
-qrencode -t ansiutf8 -l L < "$HOME/$SERVER_WG_NIC-client.conf"
+qrencode -t ansiutf8 -l L < "$HOME/$SERVER_WG_NIC-$CLIENT_NAME.conf"
 
 # Check if WireGuard is running
 systemctl is-active --quiet "wg-quick@$SERVER_WG_NIC"
