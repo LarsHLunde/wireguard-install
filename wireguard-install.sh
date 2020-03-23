@@ -35,6 +35,10 @@ else
     exit 1
 fi
 
+# Name your connection
+CLIENT_NAME="first_client"
+read -rp "Client name (no whitespaces): " -e -i "$CLIENT_NAME" CLIENT_NAME
+
 # Detect public IPv4 address and pre-fill for the user
 SERVER_PUB_IPV4=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
 read -rp "IPv4 or IPv6 public address: " -e -i "$SERVER_PUB_IPV4" SERVER_PUB_IP
@@ -62,10 +66,10 @@ CLIENT_WG_IPV6="fd42:42:42::2"
 read -rp "Client's WireGuard IPv6 " -e -i "$CLIENT_WG_IPV6" CLIENT_WG_IPV6
 
 # Adguard DNS by default
-CLIENT_DNS_1="176.103.130.130"
+CLIENT_DNS_1="1.1.1.1"
 read -rp "First DNS resolver to use for the client: " -e -i "$CLIENT_DNS_1" CLIENT_DNS_1
 
-CLIENT_DNS_2="176.103.130.131"
+CLIENT_DNS_2="8.8.8.8"
 read -rp "Second DNS resolver to use for the client: " -e -i "$CLIENT_DNS_2" CLIENT_DNS_2
 
 SYM_KEY="y"
@@ -136,6 +140,9 @@ else
 PostDown = iptables -D FORWARD -i $SERVER_WG_NIC -j ACCEPT; iptables -t nat -D POSTROUTING -o $SERVER_PUB_NIC -j MASQUERADE; ip6tables -D FORWARD -i $SERVER_WG_NIC -j ACCEPT; ip6tables -t nat -D POSTROUTING -o $SERVER_PUB_NIC -j MASQUERADE" >> "/etc/wireguard/$SERVER_WG_NIC.conf"
 fi
 
+# Add start marker to peer
+echo "# $CLIENT_NAME MARKER START" >> /etc/wireguard/$SERVER_WG_NIC.conf
+
 # Add the client as a peer to the server
 echo "[Peer]
 PublicKey = $CLIENT_PUB_KEY
@@ -161,6 +168,8 @@ case "$SYM_KEY" in
         echo "PresharedKey = $CLIENT_SYMM_PRE_KEY" >> "$HOME/$SERVER_WG_NIC-client.conf"
         ;;
 esac
+
+echo "# $CLIENT_NAME MARKER END" >> /etc/wireguard/$SERVER_WG_NIC.conf
 
 chmod 600 -R /etc/wireguard/
 
